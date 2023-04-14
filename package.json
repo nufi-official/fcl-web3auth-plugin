@@ -1,0 +1,16 @@
+{
+  "name": "fcl-web3auth-plugin",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "files": ["dist", "src"],
+  "scripts": {
+    "build": "tsc --module commonjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^5.0.4"
+  }
+}
