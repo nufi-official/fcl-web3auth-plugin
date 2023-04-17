@@ -26,5 +26,9 @@
     "prettier": "^2.8.7",
     "typescript": "^5.0.4"
   },
-  "dependencies": {}
+  "dependencies": {},
+  "engines": {
+    "yarn": ">=1.22.19",
+    "node": ">=18.15.0"
+  }
 }
