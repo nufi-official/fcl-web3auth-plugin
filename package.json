@@ -10,8 +10,10 @@
   "type": "module",
   "scripts": {
     "build": "tsc --module commonjs",
-    "prettier": "yarn prettier .",
-    "lint": "yarn eslint ."
+    "prettier:fix": "yarn prettier .",
+    "prettier:check": "yarn prettier --check .",
+    "lint": "yarn eslint .",
+    "test:tsc": "yarn tsc --noEmit"
   },
   "keywords": [],
   "author": "",
