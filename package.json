@@ -2,14 +2,17 @@
   "name": "fcl-web3auth-plugin",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/esm/index.d.ts",
   "files": [
     "dist",
     "src"
   ],
-  "type": "module",
   "scripts": {
-    "build": "tsc --module commonjs",
+    "build": "yarn build:esm && yarn build:cjs",
+    "build:esm": "tsc",
+    "build:cjs": "tsc --module commonjs --outDir dist/cjs",
     "prettier:fix": "yarn prettier .",
     "prettier:check": "yarn prettier --check .",
     "lint": "yarn eslint .",

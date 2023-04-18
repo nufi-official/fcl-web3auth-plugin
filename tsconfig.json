@@ -5,8 +5,12 @@
     "moduleResolution": "node",
     "declaration": true,
     "sourceMap": true,
-    "outDir": "dist",
+    "rootDir": "./src",
+    "outDir": "dist/esm",
     "strict": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "allowJs": false,
+    "skipLibCheck": true,
+    "lib": ["DOM", "ES2022"]
   }
 }
