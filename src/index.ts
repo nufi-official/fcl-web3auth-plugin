@@ -40,3 +40,4 @@ export function auth(args?: AuthArgs) {
   appendLoginModal(web3AuthProviderMetadata)
 }
 
+export {web3AuthProviderMetadata as loginProviders} from './constants'
