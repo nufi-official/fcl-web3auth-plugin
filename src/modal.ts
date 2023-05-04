@@ -38,7 +38,7 @@ export const modalInnerHtml = `
   </div>
 `
 
-export const appendLoginPopup = (
+export const appendLoginModal = (
   loginProvidersMetadata: Web3AuthProviderMetadata[],
 ) => {
   const modal = window.document.createElement('div')
