@@ -6,6 +6,7 @@ import {
   Message,
   MessageType,
   ObjectBase,
+  Service,
   Signable,
 } from './types'
 
@@ -55,3 +56,6 @@ export const isAccountProofAuthMsg = (
     'nonce' in msgBody
   )
 }
+
+export const getFclServiceUid = (appId: string, serviceType: Service['type']) =>
+  `${appId}#${serviceType}`

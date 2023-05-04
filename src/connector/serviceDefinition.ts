@@ -1,16 +1,18 @@
+import * as TypeUtils from '../typeUtils'
+import {Web3AuthLoginProvider} from '../web3auth/types'
 import type * as Flow from './types'
-import * as FlowUtils from /* webpackImportAllow: 'injectionPayload' */ './utils'
-import {safeAssertUnreachable} from '../../../../utils/assertion'
-import {dappConnectorsConfig} from '../../config'
+import * as FlowUtils from './utils'
 
-export const serviceEndpoint = (walletAddress: string) => `ext:${walletAddress}`
-
-const {appId, name, description, icons, website} = dappConnectorsConfig
-
-type ServiceDefinitionArgs = {
+export type ServiceDefinitionProps = {
   walletAddress: string
+  endpoint: Web3AuthLoginProvider
   userAddress: string
   keyId: number
+  appId: string
+  name: string
+  description: string
+  icon: string
+  website: string
 } & (
   | {type: 'authn' | 'authz' | 'user-signature'}
   | {
@@ -21,15 +23,26 @@ type ServiceDefinitionArgs = {
 )
 
 export const serviceDefinition = (
-  args: ServiceDefinitionArgs,
+  args: ServiceDefinitionProps,
 ): Flow.Service => {
-  const {type, walletAddress, userAddress, keyId} = args
+  const {
+    type,
+    walletAddress,
+    endpoint,
+    userAddress,
+    keyId,
+    icon,
+    description,
+    name,
+    website,
+    appId,
+  } = args
   const service: Flow.Service = {
     f_type: 'Service',
     f_vsn: FlowUtils.version,
     type,
-    uid: `${appId}#${type}`,
-    endpoint: serviceEndpoint(walletAddress),
+    uid: FlowUtils.getFclServiceUid(appId, type),
+    endpoint,
     method: 'EXT/RPC',
     id: userAddress,
     identity: {
@@ -48,7 +61,7 @@ export const serviceDefinition = (
           f_vsn: FlowUtils.version,
           address: walletAddress,
           name,
-          icon: icons.fclDiscovery,
+          icon,
           description,
           website,
         },
@@ -70,6 +83,6 @@ export const serviceDefinition = (
       }
     }
     default:
-      return safeAssertUnreachable(args)
+      return TypeUtils.safeAssertUnreachable(args)
   }
 }

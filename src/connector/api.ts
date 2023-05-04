@@ -1,78 +1,77 @@
-import {ErrorResponse, RequestContext} from '../../messaging/types'
 import {WalletUtils} from '@onflow/fcl'
 import type * as Flow from './types'
 import * as FlowUtils from './utils'
-import {middleware} from '../../middlewares'
-import {assert, safeAssertUnreachable} from '../../../../utils/assertion'
-import {confirmInit, confirmSign} from '../../connectorWindow/utils'
-import {useDappConnectorStore} from '../../../../store/dappConnector'
-import {flow} from '../../../../wallet/flow/flowWallet'
-import {id} from 'common'
-import type {Connector} from '../../types'
-import {serviceDefinition} from './serviceDefinition'
-import {HexString} from '../../../../types'
-import {dappConnectorsConfig} from '../../config'
-import {
-  lilicoServiceDefinition,
-  overrideServiceIdentifiersWithLilico,
-} from './emulation'
+import {ServiceDefinitionProps, serviceDefinition} from './serviceDefinition'
+import * as TypeUtils from '../typeUtils'
+import {Wallet} from '../wallet'
+import {Web3AuthLoginProvider} from '../web3auth/types'
 
-const blockchain = 'flow'
-
-type Api = {
+export type Api = {
   extensionServiceInitiationMessage(
-    context: RequestContext,
     msg: Flow.ExtensionServiceInitiationMessage,
-  ): Promise<null | Flow.Message>
-  message(
-    context: RequestContext,
-    msg: Flow.Message,
-  ): Promise<null | Flow.Message>
+  ): null | Flow.Message
+  message(msg: Flow.Message): Promise<null | Flow.Message>
 }
 
-export const createHandler = () => {
-  const {walletAddress} = dappConnectorsConfig.connectors[blockchain]
-
-  type State = {
-    userApproved: boolean
-    currentServiceType: null | 'authn' | 'authz' | 'user-signature'
-    serviceEndpoint: null | string
-  }
+export const createApi = (
+  wallet: Wallet,
+  services: Record<Web3AuthLoginProvider, ServiceDefinitionProps>,
+): Api => {
+  type State =
+    | {
+        currentServiceType: 'authn' | 'authz' | 'user-signature'
+        currentLoginProvider: keyof typeof services
+      }
+    | {
+        currentServiceType: null
+        currentLoginProvider: null
+      }
   let state: State = {
-    userApproved: false,
     currentServiceType: null,
-    serviceEndpoint: null,
+    currentLoginProvider: null,
   }
-  const updateState = (update: Partial<State>) => {
+  const updateState = (update: State) => {
     state = {...state, ...update}
   }
 
-  const api: Api = {
-    async extensionServiceInitiationMessage(context, msg) {
-      // Argument validation
-      assert(FlowUtils.isExtensionServiceInitiationMessage(msg))
+  return {
+    extensionServiceInitiationMessage(
+      msg: Flow.ExtensionServiceInitiationMessage,
+    ) {
+      if (
+        // if message is not for any of the services but for some other wallet provider (e.g. nufi, lilico)
+        !Object.values(services).some(
+          ({appId}) =>
+            msg.service.uid ===
+            FlowUtils.getFclServiceUid(appId, msg.service.type),
+        )
+      ) {
+        // we reset the state and do not respond
+        updateState({
+          currentServiceType: null,
+          currentLoginProvider: null,
+        })
+        return null
+      }
       switch (msg.service.type) {
         case 'authn':
         case 'authz':
         case 'user-signature':
           updateState({
             currentServiceType: msg.service.type,
-            // saving the serviceEndpoint helps to determine, how was the connection initialized, whether it was through nufi,
-            // or some other wallet we emulate. We need this o determine what kind of responses we should return
-            serviceEndpoint: msg.service.endpoint,
+            currentLoginProvider: msg.service.endpoint as keyof typeof services,
           })
           return {type: 'FCL:VIEW:READY'}
         default:
           break
       }
 
-      updateState({currentServiceType: null})
+      updateState({currentServiceType: null, currentLoginProvider: null})
       return null
     },
-    async message(context, msg) {
+    async message(msg: Flow.Message) {
       // Argument validation
-      assert(FlowUtils.isMessage(msg))
-      assert(msg.type === 'FCL:VIEW:READY:RESPONSE')
+      TypeUtils.assert(msg.type === 'FCL:VIEW:READY:RESPONSE')
 
       // If we aren't currently in an active exchange this message isn't meant
       // for us.
@@ -83,79 +82,43 @@ export const createHandler = () => {
       // just silently ignore them.
       if (msg.service?.type !== state.currentServiceType) return null
 
-      // Try acquiring user approval if we don't have it.
-      if (!state.userApproved) {
-        const userApproved = await confirmInit(
-          {
-            origin: context.trusted.origin,
-            favIconUrl: context.trusted.favIconUrl,
-          },
-          blockchain,
-        )
-        updateState({userApproved})
-      }
-
-      // Ensure that there is user approval beyond this point. Send back
-      // appropriate message if we don't have it.
-      if (!state.userApproved) {
-        if (state.currentServiceType === 'authn') {
-          return id<Flow.Message & Flow.PollingResponse>({
-            type: 'FCL:VIEW:RESPONSE',
-            f_type: 'PollingResponse',
-            f_vsn: FlowUtils.version,
-            status: 'DECLINED',
-            reason: 'Declined by user.',
-          })
-        }
-        return null
-      }
-
-      const {selectedAccount} = useDappConnectorStore.getState()
-      assert(selectedAccount != null)
-      const accountId = selectedAccount.id
-      const data = flow.accountsStore.getAccount(accountId)
-      const accountInfo = await flow.accountManager.getAccountInfo(data)
-      const userAddress = accountInfo.address
-      const keyId = accountInfo.publicKeyInfo.index
-
+      const serviceProps = services[state.currentLoginProvider]
       switch (state.currentServiceType) {
         case 'authn': {
+          await wallet.login(state.currentLoginProvider)
+          const {address: userAddress, pubKeyInfo} =
+            await wallet.ensureAccountIsCreatedOnChain()
+          const keyId = pubKeyInfo.index
           const services = [
             serviceDefinition({
+              ...serviceProps,
               type: 'authn',
-              walletAddress,
               userAddress,
               keyId,
             }),
             serviceDefinition({
+              ...serviceProps,
               type: 'authz',
-              walletAddress,
               userAddress,
               keyId,
             }),
             serviceDefinition({
+              ...serviceProps,
               type: 'user-signature',
-              walletAddress,
               userAddress,
               keyId,
             }),
           ]
           // https://developers.flow.com/tools/fcl-js/reference/proving-authentication
-          if (
-            FlowUtils.isAccountProofAuthMsg(msg.body) &&
-            // remove once ledger supports account-proof,
-            accountInfo.cryptoProviderType === 'mnemonic'
-          ) {
-            const accountProofData = msg?.body
-            const signature =
-              await flow.accountManager.signProofOfAccountOwnership(
-                accountProofData,
-                accountInfo,
-              )
+          if (FlowUtils.isAccountProofAuthMsg(msg.body)) {
+            const accountProofData = msg.body
+            const signature = await wallet.signProofOfAccountOwnership(
+              accountProofData,
+            )
             services.push(
               serviceDefinition({
+                ...serviceProps,
                 type: 'account-proof',
-                walletAddress,
                 userAddress,
                 keyId,
                 signatures: [
@@ -172,7 +135,7 @@ export const createHandler = () => {
             )
           }
 
-          return id<Flow.Message & Flow.PollingResponse>({
+          return TypeUtils.id<Flow.Message & Flow.PollingResponse>({
             type: 'FCL:VIEW:RESPONSE',
             f_type: 'PollingResponse',
             f_vsn: FlowUtils.version,
@@ -182,15 +145,7 @@ export const createHandler = () => {
               f_type: 'AuthnResponse',
               f_vsn: FlowUtils.version,
               addr: userAddress,
-              // we override attributes which might identify the connector to the dapp because
-              // there are existing dapps (https://id.ecdao.org) which use these identifiers after the communication is initialized
-              // here we rely on the serviceEndpoint state set up when initializing the connection
-              services:
-                state.serviceEndpoint === lilicoServiceDefinition.endpoint
-                  ? services.map((service) =>
-                      overrideServiceIdentifiersWithLilico(service),
-                    )
-                  : services,
+              services,
             },
           })
         }
@@ -200,24 +155,17 @@ export const createHandler = () => {
           // containing the signable.
           if (!FlowUtils.isSignable(msg.body)) return null
 
+          const {address: userAddress, pubKeyInfo} = wallet.accountInfo
+          const keyId = pubKeyInfo.index
+
           const message = WalletUtils.encodeMessageFromSignable(
             msg.body,
             userAddress,
-          ) as HexString
-          const onSign = () =>
-            flow.accountManager.signTxMessage(message, accountInfo)
+          )
 
           try {
-            const signature = await confirmSign(
-              'sign-tx',
-              {
-                type: blockchain,
-                data: {signable: msg.body},
-              },
-              onSign,
-              () => undefined as unknown as ErrorResponse,
-            )
-            return id<Flow.Message & Flow.PollingResponse>({
+            const signature = await wallet.signTxMessage(message)
+            return TypeUtils.id<Flow.Message & Flow.PollingResponse>({
               type: 'FCL:VIEW:RESPONSE',
               f_type: 'PollingResponse',
               f_vsn: FlowUtils.version,
@@ -232,7 +180,7 @@ export const createHandler = () => {
               },
             })
           } catch {
-            return id<Flow.Message & Flow.PollingResponse>({
+            return TypeUtils.id<Flow.Message & Flow.PollingResponse>({
               type: 'FCL:VIEW:RESPONSE',
               f_type: 'PollingResponse',
               f_vsn: FlowUtils.version,
@@ -242,28 +190,20 @@ export const createHandler = () => {
           }
         }
         case 'user-signature': {
-          assert(
+          TypeUtils.assert(
             !!(msg.body && 'message' in msg?.body),
             `User message is undefined ${msg}}`,
           )
 
           // fcl validates that the message is indeed hex string
-          const messageHex = msg.body.message as HexString
+          const message = msg.body.message
 
-          const onSign = () =>
-            flow.accountManager.signUserMessage(messageHex, accountInfo)
+          const {address: userAddress, pubKeyInfo} = wallet.accountInfo
+          const keyId = pubKeyInfo.index
 
           try {
-            const signature = await confirmSign(
-              'sign-message',
-              {
-                type: blockchain,
-                data: {messageHex},
-              },
-              onSign,
-              () => undefined as unknown as ErrorResponse,
-            )
-            return id<Flow.Message & Flow.PollingResponse>({
+            const signature = await wallet.signUserMessage(message)
+            return TypeUtils.id<Flow.Message & Flow.PollingResponse>({
               type: 'FCL:VIEW:RESPONSE',
               f_type: 'PollingResponse',
               f_vsn: FlowUtils.version,
@@ -278,7 +218,7 @@ export const createHandler = () => {
               },
             })
           } catch {
-            return id<Flow.Message & Flow.PollingResponse>({
+            return TypeUtils.id<Flow.Message & Flow.PollingResponse>({
               type: 'FCL:VIEW:RESPONSE',
               f_type: 'PollingResponse',
               f_vsn: FlowUtils.version,
@@ -288,17 +228,8 @@ export const createHandler = () => {
           }
         }
         default:
-          return safeAssertUnreachable(state.currentServiceType)
+          return TypeUtils.safeAssertUnreachable(state)
       }
     },
   }
-
-  return middleware.resolveMethod(api, {
-    notEnabledError: 'wrong method' as unknown as ErrorResponse,
-    passContext: true,
-  })
 }
-
-const connector: Connector = {createHandler}
-
-export default connector
