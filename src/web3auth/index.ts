@@ -39,6 +39,10 @@ export class Web3AuthProvider {
     return !!this._user
   }
 
+  get network() {
+    return this.web3AuthConnection.network
+  }
+
   public logout() {
     this._user = null
   }

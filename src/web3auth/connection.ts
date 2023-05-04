@@ -4,7 +4,7 @@ import {CHAIN_NAMESPACES, WALLET_ADAPTERS} from '@web3auth/base'
 import type {Web3AuthLoginProvider, Web3AuthNetworkType} from './types'
 
 export class Web3AuthConnection {
-  constructor(private network: Web3AuthNetworkType, private clientId: string) {
+  constructor(public network: Web3AuthNetworkType, private clientId: string) {
     this.network = network
     this.clientId = clientId
   }

@@ -44,3 +44,17 @@ export const web3AuthNetworkToFlowportApiMapping: Record<
   mainnet: 'https://hardware-wallet-api-mainnet.onflow.org',
   testnet: 'https://hardware-wallet-api-testnet.staging.onflow.org',
 }
+
+type CadenceSmartContractNames = 'ChildAccount'
+
+export const web3AuthNetworkToCadenceContractAddresses: Record<
+  Web3AuthNetworkType,
+  Record<CadenceSmartContractNames, string>
+> = {
+  mainnet: {
+    ChildAccount: '', // TODO: not deployed yet
+  },
+  testnet: {
+    ChildAccount: '0x1b655847a90e644a',
+  },
+}

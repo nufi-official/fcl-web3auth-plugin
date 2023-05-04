@@ -1,5 +1,5 @@
 declare module '@onflow/fcl' {
-  export function config(settings: Record<string, unknown>): void
+  export function config(settings?: Record<string, unknown>): void
   export async function authenticate(args?: {
     service?: unknown
   }): Promise<unknown>
@@ -21,6 +21,10 @@ declare module '@onflow/fcl' {
   }>
   export function currentUser(): {snapshot: () => Promise<{addr: string}>}
   export function unauthenticate()
+  export function mutate(args: {
+    cadence: string
+    args: (arg, t) => Array
+  }): Promise<string>
 
   export const WalletUtils: {
     injectExtService(service: unknown): void
