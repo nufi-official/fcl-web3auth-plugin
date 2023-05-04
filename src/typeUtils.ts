@@ -22,3 +22,7 @@ export type Equals<T, S> = [T] extends [S]
     ? true
     : false
   : false
+
+export type NewType<name extends string, base = string> = base & {
+  [_ in `__NewType_${name}`]: undefined
+}
