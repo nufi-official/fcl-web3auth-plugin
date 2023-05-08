@@ -1,5 +1,5 @@
-import {authWithProvider} from './actions'
 import {Web3AuthProviderMetadata} from './types'
+import {Web3AuthLoginProvider} from './web3auth/types'
 
 export const getButtonInnerHtml = (serviceName: string, imgSrc: string) => `
   <div style="padding: 0.75rem;">
@@ -40,6 +40,9 @@ export const modalInnerHtml = `
 
 export const appendLoginModal = (
   loginProvidersMetadata: Web3AuthProviderMetadata[],
+  onAuthWithProvider: (
+    loginProvider: Web3AuthLoginProvider,
+  ) => Promise<unknown>,
 ) => {
   const modal = window.document.createElement('div')
   modal.innerHTML = modalInnerHtml
@@ -49,7 +52,7 @@ export const appendLoginModal = (
   const buttons = loginProvidersMetadata.map(({name, icon, id}) => {
     const button = window.document.createElement('button')
     button.onclick = () => {
-      authWithProvider(id).then(() => modal.remove())
+      onAuthWithProvider(id).then(() => modal.remove())
     }
     button.style.cssText =
       'margin-top: 10px;margin-bottom: 10px;background: transparent;cursor: pointer;background-color: #FFFFFF;box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.12),0 1px 2px 0 rgba(0, 0, 0, 0.16);border-radius: 0.25rem;'

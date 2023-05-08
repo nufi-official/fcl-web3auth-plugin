@@ -1,3 +1,4 @@
+import type {ServiceDefinitionProps} from './connector/serviceDefinition'
 import {Web3AuthProviderMetadata} from './types'
 import {Web3AuthLoginProvider, Web3AuthNetworkType} from './web3auth/types'
 
@@ -15,6 +16,26 @@ export const web3AuthProviderMetadata: Web3AuthProviderMetadata[] = [
     id: 'facebook',
   },
 ]
+
+export const web3AuthFclServices = web3AuthProviderMetadata.reduce(
+  (acc, curr) => {
+    const {id, ...rest} = curr
+    return {
+      ...acc,
+      [id]: {
+        ...rest,
+        type: 'authn',
+        walletAddress: id,
+        endpoint: id, // we encode web3AuthLoginProvider into endpoint
+        userAddress: '0x0',
+        keyId: 0,
+        appId: 'web3auth',
+        website: '',
+      },
+    }
+  },
+  {} as Record<Web3AuthLoginProvider, ServiceDefinitionProps>,
+)
 
 export const web3AuthNetworkToFlowportApiMapping: Record<
   Web3AuthNetworkType,
