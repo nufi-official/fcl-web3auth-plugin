@@ -41,6 +41,8 @@ type AuthArgs =
     }
 
 export async function auth(args?: AuthArgs) {
+  // instead of exposing fn for unauth, we just logout user every time before he tries to log in
+  web3AuthProvider.instance().logout()
   if (args && 'loginProvider' in args) {
     await authWithProvider(args.loginProvider)
     return
