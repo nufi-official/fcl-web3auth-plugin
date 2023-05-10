@@ -14,9 +14,9 @@ import {listenToMessages} from './connector'
 import * as fcl from '@onflow/fcl'
 import {serviceDefinition} from './connector/serviceDefinition'
 
-type ConfigArgs = {clientId: string; networkType: Web3AuthNetworkType}
+type InitArgs = {clientId: string; networkType: Web3AuthNetworkType}
 
-export function config({clientId, networkType}: ConfigArgs) {
+export function init({clientId, networkType}: InitArgs) {
   web3AuthProvider.create(new Web3AuthConnection(networkType, clientId))
   const wallet = new Wallet(
     web3AuthProvider.instance(),
