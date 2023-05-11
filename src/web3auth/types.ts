@@ -5,7 +5,7 @@ type ValueOf<T> = T[keyof T]
 
 export const WEB3_AUTH_NETWORKS = ['mainnet', 'testnet'] as const
 
-export type Web3AuthNetworkType = Extract<
+export type Web3AuthNetwork = Extract<
   OPENLOGIN_NETWORK_TYPE,
   (typeof WEB3_AUTH_NETWORKS)[number]
 >

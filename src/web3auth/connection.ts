@@ -1,10 +1,10 @@
 import {Web3AuthCore} from '@web3auth/core'
 import {OpenloginAdapter} from '@web3auth/openlogin-adapter'
 import {CHAIN_NAMESPACES, WALLET_ADAPTERS} from '@web3auth/base'
-import type {Web3AuthLoginProvider, Web3AuthNetworkType} from './types'
+import type {Web3AuthLoginProvider, Web3AuthNetwork} from './types'
 
 export class Web3AuthConnection {
-  constructor(private network: Web3AuthNetworkType, private clientId: string) {
+  constructor(private network: Web3AuthNetwork, private clientId: string) {
     this.network = network
     this.clientId = clientId
   }

@@ -49,10 +49,10 @@ export const appendLoginModal = (
 
   window.document.body.append(modal)
 
-  const buttons = loginProvidersMetadata.map(({name, icon, id}) => {
+  const buttons = loginProvidersMetadata.map(({name, icon, loginProvider}) => {
     const button = window.document.createElement('button')
     button.onclick = () => {
-      onAuthWithProvider(id).then(() => modal.remove())
+      onAuthWithProvider(loginProvider).then(() => modal.remove())
     }
     button.style.cssText =
       'margin-top: 10px;margin-bottom: 10px;background: transparent;cursor: pointer;background-color: #FFFFFF;box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.12),0 1px 2px 0 rgba(0, 0, 0, 0.16);border-radius: 0.25rem;'
