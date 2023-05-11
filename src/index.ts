@@ -1,4 +1,4 @@
-import {Web3AuthLoginProvider, Web3AuthNetworkType} from './web3auth/types'
+import {Web3AuthLoginProvider, Web3AuthNetwork} from './web3auth/types'
 import web3AuthProvider from './web3auth'
 import {
   web3AuthFclServices,
@@ -14,13 +14,13 @@ import {listenToMessages} from './connector'
 import * as fcl from '@onflow/fcl'
 import {serviceDefinition} from './connector/serviceDefinition'
 
-type InitArgs = {clientId: string; networkType: Web3AuthNetworkType}
+type InitArgs = {clientId: string; network: Web3AuthNetwork}
 
-export function init({clientId, networkType}: InitArgs) {
-  web3AuthProvider.create(new Web3AuthConnection(networkType, clientId))
+export function init({clientId, network}: InitArgs) {
+  web3AuthProvider.create(new Web3AuthConnection(network, clientId))
   const wallet = new Wallet(
     web3AuthProvider.instance(),
-    new FlowportApiConnection(web3AuthNetworkToFlowportApiMapping[networkType]),
+    new FlowportApiConnection(web3AuthNetworkToFlowportApiMapping[network]),
   )
   const api = createApi(wallet, web3AuthFclServices)
   listenToMessages(api)

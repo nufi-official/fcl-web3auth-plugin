@@ -1,6 +1,6 @@
 import type {ServiceDefinitionProps} from './connector/serviceDefinition'
 import {Web3AuthProviderMetadata} from './types'
-import {Web3AuthLoginProvider, Web3AuthNetworkType} from './web3auth/types'
+import {Web3AuthLoginProvider, Web3AuthNetwork} from './web3auth/types'
 
 export const web3AuthProviderMetadata: Web3AuthProviderMetadata[] = [
   {
@@ -38,7 +38,7 @@ export const web3AuthFclServices = web3AuthProviderMetadata.reduce(
 )
 
 export const web3AuthNetworkToFlowportApiMapping: Record<
-  Web3AuthNetworkType,
+  Web3AuthNetwork,
   string
 > = {
   mainnet: 'https://hardware-wallet-api-mainnet.onflow.org',
