@@ -50,7 +50,9 @@ export async function auth(args?: AuthArgs) {
   if (args && 'loginProviderWhiteList' in args) {
     const whitelist = args.loginProviderWhiteList
     const web3AuthProviderMetadataWhitelist = whitelist
-      ? web3AuthProviderMetadata.filter(({id}) => whitelist.includes(id))
+      ? web3AuthProviderMetadata.filter(({loginProvider}) =>
+          whitelist.includes(loginProvider),
+        )
       : web3AuthProviderMetadata
     appendLoginModal(web3AuthProviderMetadataWhitelist, authWithProvider)
     return

@@ -4,5 +4,5 @@ export type Web3AuthProviderMetadata = {
   name: string
   icon: string
   description: string
-  id: Web3AuthLoginProvider
+  loginProvider: Web3AuthLoginProvider
 }
