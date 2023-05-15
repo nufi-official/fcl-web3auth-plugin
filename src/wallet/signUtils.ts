@@ -1,8 +1,8 @@
-import {PrivKey, PubKey, RootKeyPair} from './types'
-import {bip32} from './bip32'
+import {bip32} from '../web3auth/bip32'
 import {assert} from '../typeUtils'
 import {ec as EC} from 'elliptic'
 import {SHA256 as SHA2} from 'sha2'
+import {PrivKey, PubKey, RootKeyPair} from './types'
 
 // https://www.oreilly.com/library/view/mastering-bitcoin-2nd/9781491954379/ch04.html#idm139772240917008
 const sansUncompressedPrefix = (uncompressedPubKey: string): PubKey =>

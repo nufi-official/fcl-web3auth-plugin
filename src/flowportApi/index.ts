@@ -1,6 +1,6 @@
 import * as fcl from '@onflow/fcl'
 import {HttpRequestError, request} from './request'
-import {PubKey} from '../web3auth/types'
+import {PubKey} from '../wallet/types'
 
 type FlowportAccountInfoSuccessResponse = {
   address: string
