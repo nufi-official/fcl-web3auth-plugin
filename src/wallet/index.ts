@@ -6,7 +6,7 @@ import {AccountInfo, AccountInfoOnChain, PubKey} from './types'
 import * as fcl from '@onflow/fcl'
 import {Web3AuthConnection} from '../web3auth/connection'
 import {hashMsgHex, secp256k1, seedToKeyPair} from './signUtils'
-import {Web3AuthLoginProvider} from '../web3auth/types'
+import {Web3AuthLoginProvider, Web3authUserMetadata} from '../web3auth/types'
 
 export class Wallet {
   private _accountInfo: AccountInfo | null = null
@@ -48,19 +48,32 @@ export class Wallet {
   ensureUserLoggedIn = async (
     loginProvider: Web3AuthLoginProvider,
   ): Promise<AccountInfo> => {
-    // TODO: make web3user info part of the account info and check if the passed provider is the same
-    const {privateKey} = (await this.web3AuthConnection.isLoggedIn())
-      ? await this.web3AuthConnection.reLogin()
-      : await this.web3AuthConnection.login(loginProvider)
-    return this.login(privateKey)
+    if (await this.web3AuthConnection.isLoggedIn()) {
+      // re-login in web3Auth with the previously logged user to get user info
+      const userInfo = await this.web3AuthConnection.reLogin()
+      // login only if the login provider of the previous user match the current login provider
+      if (userInfo.userMetadata.loginProvider === loginProvider) {
+        return this.login(userInfo)
+      }
+    }
+    // if not logged in, do fresh login
+    const userInfo = await this.web3AuthConnection.login(loginProvider)
+    return this.login(userInfo)
   }
 
-  private login = async (privateKey: Buffer): Promise<AccountInfo> => {
-    const rootKeyPair = seedToKeyPair(privateKey.toString('hex'))
+  private login = async (userInfo: {
+    privateKey: Buffer
+    userMetadata: Web3authUserMetadata
+  }): Promise<AccountInfo> => {
+    const rootKeyPair = seedToKeyPair(userInfo.privateKey.toString('hex'))
     const accountInfoOnChain = await this.ensureAccountIsCreatedOnChain(
       rootKeyPair.pubKey,
     )
-    this._accountInfo = {...accountInfoOnChain, privKey: rootKeyPair.privKey}
+    this._accountInfo = {
+      ...accountInfoOnChain,
+      privKey: rootKeyPair.privKey,
+      web3authUserInfo: userInfo.userMetadata,
+    }
     return this._accountInfo
   }
 

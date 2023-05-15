@@ -31,3 +31,10 @@ export type Web3AuthLoginProvider = Extract<
 export type Web3AuthMfaLevel = 'default' | 'optional' | 'mandatory' | 'none'
 
 export type Web3AuthMode = 'redirect' | 'popup'
+
+export type Web3authUserMetadata = {
+  email?: string
+  name?: string
+  profileImage?: string
+  loginProvider: Web3AuthLoginProvider
+}

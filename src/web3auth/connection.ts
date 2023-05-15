@@ -6,6 +6,7 @@ import type {
   Web3AuthMfaLevel,
   Web3AuthMode,
   Web3AuthNetwork,
+  Web3authUserMetadata,
 } from './types'
 import {assert} from '../typeUtils'
 
@@ -54,10 +55,16 @@ export class Web3AuthConnection {
       'hex',
     )
     const userInfo = await this.web3auth.getUserInfo()
+    const userMetadata: Web3authUserMetadata = {
+      email: userInfo.email,
+      name: userInfo.name,
+      profileImage: userInfo.profileImage,
+      loginProvider: userInfo.typeOfLogin as Web3AuthLoginProvider,
+    }
 
     return {
       privateKey,
-      userInfo,
+      userMetadata,
     }
   }
 
