@@ -1,5 +1,4 @@
 import {Web3AuthLoginProvider, Web3AuthNetwork} from './web3auth/types'
-import web3AuthProvider from './web3auth'
 import {
   web3AuthFclServices,
   web3AuthNetworkToFlowportApiMapping,
@@ -8,21 +7,22 @@ import {
 import {FlowportApiConnection} from './flowportApi'
 import {appendLoginModal} from './modal'
 import {Web3AuthConnection} from './web3auth/connection'
-import {Wallet} from './wallet'
 import {createApi} from './connector/api'
 import {listenToMessages} from './connector'
 import * as fcl from '@onflow/fcl'
 import {serviceDefinition} from './connector/serviceDefinition'
+import wallet from './wallet'
 
 type InitArgs = {clientId: string; network: Web3AuthNetwork}
 
 export function init({clientId, network}: InitArgs) {
-  web3AuthProvider.create(new Web3AuthConnection(network, clientId))
-  const wallet = new Wallet(
-    web3AuthProvider.instance(),
-    new FlowportApiConnection(web3AuthNetworkToFlowportApiMapping[network]),
+  const api = createApi(
+    wallet.create(
+      new Web3AuthConnection(network, clientId),
+      new FlowportApiConnection(web3AuthNetworkToFlowportApiMapping[network]),
+    ),
+    web3AuthFclServices,
   )
-  const api = createApi(wallet, web3AuthFclServices)
   listenToMessages(api)
 }
 
@@ -42,7 +42,7 @@ type AuthArgs =
 
 export async function auth(args?: AuthArgs) {
   // instead of exposing fn for unauth, we just logout user every time before he tries to log in
-  web3AuthProvider.instance().logout()
+  await wallet.instance().logout()
   if (args && 'loginProvider' in args) {
     await authWithProvider(args.loginProvider)
     return

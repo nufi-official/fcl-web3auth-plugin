@@ -85,9 +85,8 @@ export const createApi = (
       const serviceProps = services[state.currentLoginProvider]
       switch (state.currentServiceType) {
         case 'authn': {
-          await wallet.login(state.currentLoginProvider)
           const {address: userAddress, pubKeyInfo} =
-            await wallet.ensureAccountIsCreatedOnChain()
+            await wallet.ensureUserLoggedIn(state.currentLoginProvider)
           const keyId = pubKeyInfo.index
           const services = [
             serviceDefinition({
@@ -155,7 +154,8 @@ export const createApi = (
           // containing the signable.
           if (!FlowUtils.isSignable(msg.body)) return null
 
-          const {address: userAddress, pubKeyInfo} = wallet.accountInfo
+          const {address: userAddress, pubKeyInfo} =
+            await wallet.ensureUserLoggedIn(state.currentLoginProvider)
           const keyId = pubKeyInfo.index
 
           const message = WalletUtils.encodeMessageFromSignable(
@@ -198,7 +198,8 @@ export const createApi = (
           // fcl validates that the message is indeed hex string
           const message = msg.body.message
 
-          const {address: userAddress, pubKeyInfo} = wallet.accountInfo
+          const {address: userAddress, pubKeyInfo} =
+            await wallet.ensureUserLoggedIn(state.currentLoginProvider)
           const keyId = pubKeyInfo.index
 
           try {

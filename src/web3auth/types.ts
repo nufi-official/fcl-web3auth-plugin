@@ -1,5 +1,4 @@
 import type {OPENLOGIN_NETWORK_TYPE, LOGIN_PROVIDER} from '@toruslabs/openlogin'
-import {NewType} from '../typeUtils'
 
 type ValueOf<T> = T[keyof T]
 
@@ -29,11 +28,6 @@ export type Web3AuthLoginProvider = Extract<
   (typeof WEB3_AUTH_LOGIN_PROVIDERS)[number]
 >
 
-export type PubKey = NewType<'PubKeyHex', string>
+export type Web3AuthMfaLevel = 'default' | 'optional' | 'mandatory' | 'none'
 
-export type PrivKey = NewType<'PrivKey', string>
-
-export type RootKeyPair = {
-  privKey: PrivKey
-  pubKey: PubKey
-}
+export type Web3AuthMode = 'redirect' | 'popup'

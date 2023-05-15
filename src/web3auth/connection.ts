@@ -1,56 +1,89 @@
 import {Web3AuthCore} from '@web3auth/core'
 import {OpenloginAdapter} from '@web3auth/openlogin-adapter'
-import {CHAIN_NAMESPACES, WALLET_ADAPTERS} from '@web3auth/base'
-import type {Web3AuthLoginProvider, Web3AuthNetwork} from './types'
+import {ADAPTER_STATUS, CHAIN_NAMESPACES, WALLET_ADAPTERS} from '@web3auth/base'
+import type {
+  Web3AuthLoginProvider,
+  Web3AuthMfaLevel,
+  Web3AuthMode,
+  Web3AuthNetwork,
+} from './types'
+import {assert} from '../typeUtils'
 
 export class Web3AuthConnection {
-  constructor(private network: Web3AuthNetwork, private clientId: string) {
-    this.network = network
-    this.clientId = clientId
-  }
+  private web3auth: Web3AuthCore
+  private mfaLevel: Web3AuthMfaLevel
 
-  login = async (loginProvider: Web3AuthLoginProvider) => {
-    const web3auth = new Web3AuthCore({
-      clientId: this.clientId,
+  constructor(
+    private network: Web3AuthNetwork,
+    clientId: string,
+    mfaLevel: Web3AuthMfaLevel = 'none',
+    uxMode: Web3AuthMode = 'popup',
+  ) {
+    this.network = network
+    this.mfaLevel = mfaLevel
+    this.web3auth = new Web3AuthCore({
+      clientId,
       web3AuthNetwork: this.network,
       chainConfig: {
         chainNamespace: CHAIN_NAMESPACES.OTHER,
       },
     })
+
     const openloginAdapter = new OpenloginAdapter({
       adapterSettings: {
-        clientId: this.clientId,
+        clientId,
         network: this.network,
-        uxMode: 'popup',
+        uxMode,
       },
     })
-    web3auth.configureAdapter(openloginAdapter)
+    this.web3auth.configureAdapter(openloginAdapter)
+  }
 
-    await web3auth.init()
-    if (web3auth.provider) {
-      await web3auth.logout()
+  private async init() {
+    if (this.web3auth.status === ADAPTER_STATUS.NOT_READY) {
+      await this.web3auth.init()
     }
+  }
 
-    const provider = await web3auth.connectTo(WALLET_ADAPTERS.OPENLOGIN, {
-      mfaLevel: 'none', // Pass on the mfa level of your choice: default, optional, mandatory, none
-      loginProvider,
-    })
-
-    if (provider == null) {
-      throw new Error('Assertion failed')
-    }
-
+  private async getUserInfo() {
+    assert(!!this.web3auth.provider)
     const privateKey = Buffer.from(
-      (await provider.request({
+      (await this.web3auth.provider.request({
         method: 'private_key',
       })) as string,
       'hex',
     )
-    const userInfo = await web3auth.getUserInfo()
+    const userInfo = await this.web3auth.getUserInfo()
 
     return {
       privateKey,
       userInfo,
     }
+  }
+
+  isLoggedIn = async () => {
+    await this.init()
+    return this.web3auth.status === ADAPTER_STATUS.CONNECTED
+  }
+
+  reLogin = async () => {
+    await this.init()
+    return this.getUserInfo()
+  }
+
+  login = async (loginProvider: Web3AuthLoginProvider) => {
+    await this.init()
+    await this.logout()
+
+    await this.web3auth.connectTo(WALLET_ADAPTERS.OPENLOGIN, {
+      mfaLevel: this.mfaLevel,
+      loginProvider,
+    })
+
+    return this.getUserInfo()
+  }
+
+  logout = async () => {
+    if (await this.isLoggedIn()) await this.web3auth.logout()
   }
 }
