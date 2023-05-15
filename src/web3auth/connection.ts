@@ -17,8 +17,8 @@ export class Web3AuthConnection {
   constructor(
     private network: Web3AuthNetwork,
     clientId: string,
-    mfaLevel: Web3AuthMfaLevel = 'none',
-    uxMode: Web3AuthMode = 'popup',
+    mfaLevel: Web3AuthMfaLevel,
+    uxMode: Web3AuthMode,
   ) {
     this.network = network
     this.mfaLevel = mfaLevel
