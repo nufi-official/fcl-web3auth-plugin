@@ -48,6 +48,12 @@ export class Wallet {
   ensureUserLoggedIn = async (
     loginProvider: Web3AuthLoginProvider,
   ): Promise<AccountInfo> => {
+    if (
+      this._accountInfo &&
+      this._accountInfo.web3authUserInfo.loginProvider === loginProvider
+    ) {
+      return this._accountInfo
+    }
     if (await this.web3AuthConnection.isLoggedIn()) {
       // re-login in web3Auth with the previously logged user to get user info
       const userInfo = await this.web3AuthConnection.reLogin()
