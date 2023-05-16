@@ -2,7 +2,7 @@ import {AccountProofData} from '../connector/types'
 import {assert} from '../typeUtils'
 import {FlowportApiConnection} from '../flowportApi'
 import {addDomainTagToUserMessage} from './utils'
-import {AccountInfo, AccountInfoOnChain, PubKey} from './types'
+import {AccountInfo, PubKey, WalletActionsCallbacks} from './types'
 import * as fcl from '@onflow/fcl'
 import {Web3AuthConnection} from '../web3auth/connection'
 import {hashMsgHex, secp256k1, seedToKeyPair} from './signUtils'
@@ -13,9 +13,15 @@ export class Wallet {
   constructor(
     private web3AuthConnection: Web3AuthConnection,
     private flowportApiConnection: FlowportApiConnection,
+    private _callbacks: WalletActionsCallbacks,
   ) {
     this.web3AuthConnection = web3AuthConnection
     this.flowportApiConnection = flowportApiConnection
+    this._callbacks = _callbacks
+  }
+
+  set callbacks(o: WalletActionsCallbacks) {
+    this._callbacks = o
   }
 
   private async signMessage(message: string): Promise<string> {
@@ -29,11 +35,14 @@ export class Wallet {
     return await Promise.resolve(Buffer.concat([r, s]).toString('hex'))
   }
 
-  signTxMessage = (message: string) => this.signMessage(message)
+  signTxMessage = (message: string) =>
+    this._callbacks.confirmSign(() => this.signMessage(message), {type: 'tx'})
 
-  signUserMessage = (message: string) => {
-    return this.signMessage(addDomainTagToUserMessage(message))
-  }
+  signUserMessage = (message: string) =>
+    this._callbacks.confirmSign(
+      () => this.signMessage(addDomainTagToUserMessage(message)),
+      {type: 'message'},
+    )
 
   signProofOfAccountOwnership = (proofData: AccountProofData) => {
     assert(!!this._accountInfo)
@@ -72,9 +81,11 @@ export class Wallet {
     userMetadata: Web3authUserMetadata
   }): Promise<AccountInfo> => {
     const rootKeyPair = seedToKeyPair(userInfo.privateKey.toString('hex'))
-    const accountInfoOnChain = await this.ensureAccountIsCreatedOnChain(
-      rootKeyPair.pubKey,
-    )
+    const address = await this.ensureAccountIsCreatedOnChain(rootKeyPair.pubKey)
+    const {keys, ...rest} = await fcl.account(address)
+    const pubKeyInfo = keys.find((k) => k.publicKey === rootKeyPair.pubKey)
+    assert(!!pubKeyInfo)
+    const accountInfoOnChain = {...rest, pubKeyInfo}
     this._accountInfo = {
       ...accountInfoOnChain,
       privKey: rootKeyPair.privKey,
@@ -83,16 +94,20 @@ export class Wallet {
     return this._accountInfo
   }
 
-  private ensureAccountIsCreatedOnChain = async (
-    publicKey: PubKey,
-  ): Promise<AccountInfoOnChain> => {
-    const {address} =
-      (await this.flowportApiConnection.getAccountInfo(publicKey)) ||
-      (await this.flowportApiConnection.createAccount(publicKey))
-    const {keys, ...rest} = await fcl.account(address)
-    const pubKeyInfo = keys.find((k) => k.publicKey === publicKey)
-    assert(!!pubKeyInfo)
-    return {...rest, pubKeyInfo}
+  private ensureAccountIsCreatedOnChain = async (publicKey: PubKey) => {
+    const accountInfo = await this.flowportApiConnection.getAccountInfo(
+      publicKey,
+    )
+    if (accountInfo) {
+      return accountInfo.address
+    }
+    await this._callbacks.onCreateAccount.start()
+    return this.flowportApiConnection
+      .createAccount(publicKey)
+      .then(async (res) => {
+        await this._callbacks.onCreateAccount.end()
+        return res.address
+      })
   }
 
   logout = async () => {
@@ -111,8 +126,9 @@ export default {
   create: (
     web3AuthConnection: Web3AuthConnection,
     flowportApiConnection: FlowportApiConnection,
+    callbacks: WalletActionsCallbacks,
   ) => {
-    wallet = new Wallet(web3AuthConnection, flowportApiConnection)
+    wallet = new Wallet(web3AuthConnection, flowportApiConnection, callbacks)
     return wallet
   },
 }
