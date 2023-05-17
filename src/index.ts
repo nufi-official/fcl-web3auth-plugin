@@ -63,6 +63,8 @@ export function config(callbacks: Partial<WalletActionsCallbacks>) {
 }
 
 async function authWithProvider(loginProvider: Web3AuthLoginProvider) {
+  // instead of exposing fn for unauth, we just logout user every time before he tries to log in
+  await wallet.instance().logout()
   await fcl.authenticate({
     service: serviceDefinition(web3AuthFclServices[loginProvider]),
   })
@@ -78,8 +80,6 @@ type AuthArgs =
 
 export async function auth(args?: AuthArgs) {
   const ui = getUi()
-  // instead of exposing fn for unauth, we just logout user every time before he tries to log in
-  wallet.instance().logout()
 
   if (args && 'loginProvider' in args) {
     await authWithProvider(args.loginProvider)
