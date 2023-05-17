@@ -44,3 +44,27 @@ export const web3AuthNetworkToFlowportApiMapping: Record<
   mainnet: 'https://hardware-wallet-api-mainnet.onflow.org',
   testnet: 'https://hardware-wallet-api-testnet.staging.onflow.org',
 }
+
+type CadenceSmartContractNames =
+  | 'NonFungibleToken'
+  | 'MetadataViews'
+  | 'LinkedAccountMetadataViews'
+  | 'LinkedAccounts'
+
+export const web3AuthNetworkToCadenceContractAddresses: Record<
+  Web3AuthNetwork,
+  Record<CadenceSmartContractNames, string>
+> = {
+  mainnet: {
+    NonFungibleToken: '0x1d7e57aa55817448',
+    MetadataViews: '0x1d7e57aa55817448',
+    LinkedAccounts: '', // TODO: not deployed yet
+    LinkedAccountMetadataViews: '', // TODO: not deployed yet
+  },
+  testnet: {
+    NonFungibleToken: '0x631e88ae7f1d7c20',
+    MetadataViews: '0x631e88ae7f1d7c20',
+    LinkedAccounts: '0x1b655847a90e644a',
+    LinkedAccountMetadataViews: '0x1b655847a90e644a',
+  },
+}

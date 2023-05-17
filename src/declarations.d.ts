@@ -19,8 +19,25 @@ declare module '@onflow/fcl' {
       revoked: boolean
     }[]
   }>
-  export function currentUser(): {snapshot: () => Promise<{addr: string}>}
+  type CurrentUser = (() => {
+    snapshot: () => Promise<{addr: string}>
+  }) & {authorization: Authorization}
+  export const currentUser: CurrentUser
   export function unauthenticate()
+  export function mutate(args: {
+    cadence: string
+    args: (arg, t) => Array
+    authorizations?: Authorization[]
+  }): Promise<string>
+  export function tx(txId: string): {
+    subscribe(
+      cb: (tx: {
+        statusString: 'PENDING' | 'EXECUTED' | 'SEALED'
+        errorMessage: string
+      }) => void,
+    ): void
+  }
+  export const authz: Authorization
 
   export const WalletUtils: {
     injectExtService(service: unknown): void
@@ -35,6 +52,32 @@ declare module '@onflow/fcl' {
       includeDomainTag = true,
     )
   }
+
+  export type Account = {
+    kind: 'ACCOUNT'
+    tempId: string
+    addr: string
+    keyId: number
+    sequenceNum: number
+    signature: unknown
+    resolve: unknown
+    role: {
+      proposer: boolean
+      authorizer: boolean
+      payer: boolean
+      param: boolean
+    }
+    signingFunction: (signable: {message: string}) => Promise<fcl.SignFnResult>
+  }
+
+  export type SignFnResult = {
+    addr: string
+    keyId: number
+    signature: string
+  }
+
+  export type Authorization = (account: Account) => Account
+  export function sansPrefix(address: string): string
 }
 
 declare module 'sha2' {

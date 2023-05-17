@@ -60,6 +60,7 @@ export class Web3AuthConnection {
       name: userInfo.name,
       profileImage: userInfo.profileImage,
       loginProvider: userInfo.typeOfLogin as Web3AuthLoginProvider,
+      network: this.network,
     }
 
     return {

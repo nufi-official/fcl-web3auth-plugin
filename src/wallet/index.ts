@@ -55,7 +55,7 @@ export class Wallet {
   }
 
   ensureUserLoggedIn = async (
-    loginProvider: Web3AuthLoginProvider,
+    loginProvider?: Web3AuthLoginProvider,
   ): Promise<AccountInfo> => {
     try {
       if (
@@ -63,6 +63,13 @@ export class Wallet {
         this._accountInfo.web3authUserInfo.loginProvider === loginProvider
       ) {
         return this._accountInfo
+      }
+      // if loginProvider is not provided, we re-login with the previous user
+      if (!loginProvider) {
+        return (
+          this._accountInfo ||
+          this.login(await this.web3AuthConnection.reLogin())
+        )
       }
       if (await this.web3AuthConnection.isLoggedIn()) {
         // re-login in web3Auth with the previously logged user to get user info

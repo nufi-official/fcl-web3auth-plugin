@@ -1,6 +1,7 @@
 import {createConfirmPopup} from './confirmPopup'
 import {createLoadingSpinner} from './loadingSpinner'
 import {CreateModalArgs, createLoginModal} from './modal'
+import {createSuccessText} from './success'
 import {SigningMetadata} from './types'
 
 const overlayInnerHtml = `
@@ -47,6 +48,12 @@ const createUi = () => {
     overlay.replaceBody(loadingSpinner)
   }
 
+  const showSuccess = (successText: string) => {
+    overlay.show()
+    const success = createSuccessText(successText)
+    overlay.replaceBody(success)
+  }
+
   const confirmSign = (
     onSign: () => Promise<string>,
     metadata: SigningMetadata,
@@ -66,6 +73,7 @@ const createUi = () => {
     showLoading,
     close: overlay.close,
     confirmSign,
+    showSuccess,
   }
 }
 
