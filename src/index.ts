@@ -6,7 +6,6 @@ import {
 } from './web3auth/types'
 import {
   web3AuthFclServices,
-  web3AuthNetworkToCadenceContractAddresses,
   web3AuthNetworkToFlowportApiMapping,
   web3AuthProviderMetadata,
 } from './constants'
@@ -19,9 +18,8 @@ import * as fcl from '@onflow/fcl'
 import {serviceDefinition} from './connector/serviceDefinition'
 import wallet from './wallet'
 import {WalletActionsCallbacks} from './wallet/types'
-import {getLinkAccountCadence} from './cadence'
+import {publishAccountCadence} from './cadence'
 import {sleep} from './utils'
-import {getAuthorization} from './authorization'
 
 const getDefaultWalletCallbacks = (): WalletActionsCallbacks => {
   const ui = getUi()
@@ -113,21 +111,11 @@ export async function auth(args?: AuthArgs) {
 export {web3AuthProviderMetadata as loginProviders} from './constants'
 
 type LinkAccountArgs = {
-  linkedAccountName: string
-  linkedAccountDescription: string
-  clientThumbnailURL: string
-  clientExternalURL: string
   authAccountPathSuffix: string
-  handlerPathSuffix: string
 }
 
-export async function linkAccount(args: LinkAccountArgs): string {
+export async function linkAccount(args: LinkAccountArgs): Promise<string> {
   const childAccountInfo = await wallet.instance().ensureUserLoggedIn()
-  const childAccountAuthorization = getAuthorization(
-    childAccountInfo.address,
-    childAccountInfo.pubKeyInfo.index.toString(),
-    wallet.instance().signTxMessage,
-  )
   const serviceDefinitionProps =
     web3AuthFclServices[childAccountInfo.web3authUserInfo.loginProvider]
 
@@ -135,26 +123,24 @@ export async function linkAccount(args: LinkAccountArgs): string {
 
   await fcl.authenticate()
 
+  const address = (await fcl.currentUser().snapshot()).addr
+
   const ui = getUi()
   ui.showLoading('Signing transaction...')
 
-  const txId = await fcl.mutate({
-    cadence: getLinkAccountCadence(
-      web3AuthNetworkToCadenceContractAddresses[
-        childAccountInfo.web3authUserInfo.network
-      ],
-    ),
-    args: (arg, t) => [
-      arg(args.linkedAccountName, t.String),
-      arg(args.linkedAccountDescription, t.String),
-      arg(args.clientThumbnailURL, t.String),
-      arg(args.clientExternalURL, t.String),
-      arg(args.authAccountPathSuffix, t.String),
-      arg(args.handlerPathSuffix, t.String),
-    ],
-    authorizations: [fcl.currentUser.authorization, childAccountAuthorization],
+  await fcl.unauthenticate()
+
+  await fcl.authenticate({
+    service: serviceDefinition(serviceDefinitionProps),
   })
-  console.log(txId)
+
+  const txId = await fcl.mutate({
+    cadence: publishAccountCadence,
+    args: (arg, t) => [
+      arg(address, t.Address),
+      arg(args.authAccountPathSuffix, t.String),
+    ],
+  })
   fcl.tx(txId).subscribe((tx) => {
     if (tx.statusString === 'PENDING') {
       ui.showLoading('Awaiting execution...')
@@ -170,11 +156,6 @@ export async function linkAccount(args: LinkAccountArgs): string {
       ui.showLoading('Linking account failed') // failure icon, setFailure text
       sleep(1000).then(() => ui.close())
     }
-  })
-  await fcl.unauthenticate()
-
-  await fcl.authenticate({
-    service: serviceDefinition(serviceDefinitionProps),
   })
 
   return txId
