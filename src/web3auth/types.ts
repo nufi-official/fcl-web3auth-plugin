@@ -12,9 +12,9 @@ export type Web3AuthNetwork = Extract<
 export const WEB3_AUTH_LOGIN_PROVIDERS = [
   'google',
   'facebook',
-  // 'twitter',
+  'twitter',
   // 'reddit',
-  // 'discord',
+  'discord',
   // 'twitch',
   // 'apple',
   // 'github',
