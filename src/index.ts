@@ -27,6 +27,10 @@ const getDefaultWalletCallbacks = (): WalletActionsCallbacks => {
       end: () => ui.close(),
     },
     confirmSign: ui.confirmSign,
+    onLoginFail: (e) => {
+      ui.close()
+      throw e
+    },
   }
 }
 

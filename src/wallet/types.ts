@@ -32,4 +32,5 @@ export type WalletActionsCallbacks = {
     onSign: () => Promise<string>,
     metadata: SigningMetadata,
   ) => Promise<string>
+  onLoginFail: (e: unknown) => never
 }
