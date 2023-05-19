@@ -17,6 +17,18 @@ import {listenToMessages} from './connector'
 import * as fcl from '@onflow/fcl'
 import {serviceDefinition} from './connector/serviceDefinition'
 import wallet from './wallet'
+import {WalletActionsCallbacks} from './wallet/types'
+
+const getDefaultWalletCallbacks = (): WalletActionsCallbacks => {
+  const ui = getUi()
+  return {
+    onCreateAccount: {
+      start: () => ui.showLoading('Creating account...'),
+      end: () => ui.close(),
+    },
+    confirmSign: ui.confirmSign,
+  }
+}
 
 type InitArgs = {
   clientId: string
@@ -35,10 +47,15 @@ export function init({
     wallet.create(
       new Web3AuthConnection(network, clientId, mfaLevel, uxMode),
       new FlowportApiConnection(web3AuthNetworkToFlowportApiMapping[network]),
+      getDefaultWalletCallbacks(),
     ),
     web3AuthFclServices,
   )
   listenToMessages(api)
+}
+
+export function config(callbacks: Partial<WalletActionsCallbacks>) {
+  wallet.instance().callbacks = {...getDefaultWalletCallbacks(), ...callbacks}
 }
 
 async function authWithProvider(loginProvider: Web3AuthLoginProvider) {
