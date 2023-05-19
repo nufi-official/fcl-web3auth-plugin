@@ -20,8 +20,8 @@ export class Wallet {
     this._callbacks = _callbacks
   }
 
-  set callbacks(o: WalletActionsCallbacks) {
-    this._callbacks = o
+  public setCallbacks(callbacks: Partial<WalletActionsCallbacks>) {
+    this._callbacks = {...this._callbacks, ...callbacks}
   }
 
   private async signMessage(message: string): Promise<string> {

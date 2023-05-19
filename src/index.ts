@@ -62,8 +62,8 @@ export function init({
   listenToMessages(api)
 }
 
-export function config(callbacks: Partial<WalletActionsCallbacks>) {
-  wallet.instance().callbacks = {...getDefaultWalletCallbacks(), ...callbacks}
+export function setCallbacks(callbacks: Partial<WalletActionsCallbacks>) {
+  wallet.instance().setCallbacks(callbacks)
 }
 
 async function authWithProvider(loginProvider: Web3AuthLoginProvider) {
