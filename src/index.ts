@@ -66,7 +66,7 @@ export function setCallbacks(callbacks: Partial<WalletActionsCallbacks>) {
   wallet.instance().setCallbacks(callbacks)
 }
 
-async function authWithProvider(loginProvider: Web3AuthLoginProvider) {
+export async function authWithProvider(loginProvider: Web3AuthLoginProvider) {
   // instead of exposing fn for unauth, we just logout user every time before he tries to log in
   await wallet.instance().logout()
   await fcl.authenticate({
@@ -74,39 +74,29 @@ async function authWithProvider(loginProvider: Web3AuthLoginProvider) {
   })
 }
 
-export type AuthArgs =
-  | {
-      loginProvider: Web3AuthLoginProvider
-    }
-  | {
-      loginProviderWhiteList?: Web3AuthLoginProvider[]
-    }
+export type AuthArgs = {
+  loginProviderWhiteList: Web3AuthLoginProvider[]
+}
 
-export async function auth(args?: AuthArgs) {
+export function auth(args?: AuthArgs): void {
   const ui = getUi()
 
-  if (args && 'loginProvider' in args) {
-    await authWithProvider(args.loginProvider)
-    return
-  }
-
-  if (args && 'loginProviderWhiteList' in args) {
-    const whitelist = args.loginProviderWhiteList
-    const web3AuthProviderMetadataWhitelist = whitelist
-      ? web3AuthProviderMetadata.filter(({loginProvider}) =>
-          whitelist.includes(loginProvider),
-        )
-      : web3AuthProviderMetadata
-    ui.showLoginModal({
+  if (!args) {
+    return ui.showLoginModal({
       onAuthWithProvider: authWithProvider,
-      loginProvidersMetadata: web3AuthProviderMetadataWhitelist,
+      loginProvidersMetadata: web3AuthProviderMetadata,
     })
-    return
   }
 
-  ui.showLoginModal({
+  const web3AuthProviderMetadataWhitelist = args.loginProviderWhiteList
+    ? web3AuthProviderMetadata.filter(({loginProvider}) =>
+        args.loginProviderWhiteList.includes(loginProvider),
+      )
+    : web3AuthProviderMetadata
+
+  return ui.showLoginModal({
     onAuthWithProvider: authWithProvider,
-    loginProvidersMetadata: web3AuthProviderMetadata,
+    loginProvidersMetadata: web3AuthProviderMetadataWhitelist,
   })
 }
 
