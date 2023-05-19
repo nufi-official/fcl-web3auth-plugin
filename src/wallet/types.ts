@@ -23,13 +23,14 @@ export type AccountInfo = AccountInfoOnChain & {
   web3authUserInfo: Web3AuthUserMetadata
 }
 
+type LoginStatus =
+  | {status: 'creating_account' | 'logged_in' | 'logged_out'}
+  | {status: 'error'; error: unknown}
+
 export type WalletActionsCallbacks = {
-  onCreateAccount: {
-    start: () => unknown
-    end: () => unknown
-  }
   confirmSign: (
     onSign: () => Promise<string>,
     metadata: SigningMetadata,
   ) => Promise<string>
+  onLoginStatusChange: (status: LoginStatus) => unknown
 }

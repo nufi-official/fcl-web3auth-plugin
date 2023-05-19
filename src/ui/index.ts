@@ -25,7 +25,7 @@ const createOverlayElement = () => {
   }
 }
 
-export const getUi = () => {
+const createUi = () => {
   const overlay = createOverlayElement()
 
   const showLoginModal = (
@@ -67,4 +67,13 @@ export const getUi = () => {
     close: overlay.close,
     confirmSign,
   }
+}
+
+let ui: ReturnType<typeof createUi> | undefined
+
+export const getUi = () => {
+  if (!ui) {
+    ui = createUi()
+  }
+  return ui
 }

@@ -5,6 +5,7 @@ import {ServiceDefinitionProps, serviceDefinition} from './serviceDefinition'
 import * as TypeUtils from '../typeUtils'
 import {Wallet} from '../wallet'
 import {Web3AuthLoginProvider} from '../web3auth/types'
+import {AccountInfo} from '../wallet/types'
 
 export type Api = {
   extensionServiceInitiationMessage(
@@ -82,11 +83,19 @@ export const createApi = (
       // just silently ignore them.
       if (msg.service?.type !== state.currentServiceType) return null
 
+      let user: AccountInfo | undefined
+
+      try {
+        user = await wallet.ensureUserLoggedIn(state.currentLoginProvider)
+      } catch (e) {
+        return null
+      }
+
+      const {address: userAddress, pubKeyInfo} = user
+
       const serviceProps = services[state.currentLoginProvider]
       switch (state.currentServiceType) {
         case 'authn': {
-          const {address: userAddress, pubKeyInfo} =
-            await wallet.ensureUserLoggedIn(state.currentLoginProvider)
           const keyId = pubKeyInfo.index
           const services = [
             serviceDefinition({
@@ -154,8 +163,6 @@ export const createApi = (
           // containing the signable.
           if (!FlowUtils.isSignable(msg.body)) return null
 
-          const {address: userAddress, pubKeyInfo} =
-            await wallet.ensureUserLoggedIn(state.currentLoginProvider)
           const keyId = pubKeyInfo.index
 
           const message = WalletUtils.encodeMessageFromSignable(
@@ -198,8 +205,6 @@ export const createApi = (
           // fcl validates that the message is indeed hex string
           const message = msg.body.message
 
-          const {address: userAddress, pubKeyInfo} =
-            await wallet.ensureUserLoggedIn(state.currentLoginProvider)
           const keyId = pubKeyInfo.index
 
           try {

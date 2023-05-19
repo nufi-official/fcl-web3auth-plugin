@@ -57,23 +57,28 @@ export class Wallet {
   ensureUserLoggedIn = async (
     loginProvider: Web3AuthLoginProvider,
   ): Promise<AccountInfo> => {
-    if (
-      this._accountInfo &&
-      this._accountInfo.web3authUserInfo.loginProvider === loginProvider
-    ) {
-      return this._accountInfo
-    }
-    if (await this.web3AuthConnection.isLoggedIn()) {
-      // re-login in web3Auth with the previously logged user to get user info
-      const userInfo = await this.web3AuthConnection.reLogin()
-      // login only if the login provider of the previous user match the current login provider
-      if (userInfo.userMetadata.loginProvider === loginProvider) {
-        return this.login(userInfo)
+    try {
+      if (
+        this._accountInfo &&
+        this._accountInfo.web3authUserInfo.loginProvider === loginProvider
+      ) {
+        return this._accountInfo
       }
+      if (await this.web3AuthConnection.isLoggedIn()) {
+        // re-login in web3Auth with the previously logged user to get user info
+        const userInfo = await this.web3AuthConnection.reLogin()
+        // login only if the login provider of the previous user match the current login provider
+        if (userInfo.userMetadata.loginProvider === loginProvider) {
+          return this.login(userInfo)
+        }
+      }
+      // if not logged in, do fresh login
+      const userInfo = await this.web3AuthConnection.login(loginProvider)
+      return this.login(userInfo)
+    } catch (e) {
+      await this._callbacks.onLoginStatusChange({status: 'error', error: e})
+      throw e
     }
-    // if not logged in, do fresh login
-    const userInfo = await this.web3AuthConnection.login(loginProvider)
-    return this.login(userInfo)
   }
 
   private login = async (userInfo: {
@@ -101,11 +106,11 @@ export class Wallet {
     if (accountInfo) {
       return accountInfo.address
     }
-    await this._callbacks.onCreateAccount.start()
+    await this._callbacks.onLoginStatusChange({status: 'creating_account'})
     return this.flowportApiConnection
       .createAccount(publicKey)
       .then(async (res) => {
-        await this._callbacks.onCreateAccount.end()
+        await this._callbacks.onLoginStatusChange({status: 'logged_in'})
         return res.address
       })
   }
@@ -113,6 +118,7 @@ export class Wallet {
   logout = async () => {
     await this.web3AuthConnection.logout()
     this._accountInfo = null
+    this._callbacks.onLoginStatusChange({status: 'logged_out'})
   }
 }
 
