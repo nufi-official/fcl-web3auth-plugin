@@ -38,7 +38,7 @@ const getDefaultWalletCallbacks = (): WalletActionsCallbacks => {
   }
 }
 
-type InitArgs = {
+export type InitArgs = {
   clientId: string
   network: Web3AuthNetwork
   mfaLevel?: Web3AuthMfaLevel
@@ -74,7 +74,7 @@ async function authWithProvider(loginProvider: Web3AuthLoginProvider) {
   })
 }
 
-type AuthArgs =
+export type AuthArgs =
   | {
       loginProvider: Web3AuthLoginProvider
     }
@@ -115,3 +115,7 @@ export {web3AuthProviderMetadata as loginProviders} from './constants'
 export const getUserInfo = () => {
   return wallet.instance().accountInfo?.web3authUserInfo
 }
+
+export * from './web3auth/types'
+export * from './wallet/types'
+export * from './types'

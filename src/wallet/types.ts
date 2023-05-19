@@ -23,7 +23,7 @@ export type AccountInfo = AccountInfoOnChain & {
   web3authUserInfo: Web3AuthUserMetadata
 }
 
-type LoginStatus =
+export type LoginStatus =
   | {status: 'creating_account' | 'logged_in' | 'logged_out'}
   | {status: 'error'; error: unknown}
 
