@@ -37,4 +37,5 @@ export type Web3authUserMetadata = {
   name?: string
   profileImage?: string
   loginProvider: Web3AuthLoginProvider
+  network: Web3AuthNetwork
 }

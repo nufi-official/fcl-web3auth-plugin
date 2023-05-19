@@ -1,6 +1,6 @@
 {
   "name": "fcl-web3auth-plugin",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "description": "",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
@@ -36,6 +36,7 @@
     "typescript": "^5.0.4"
   },
   "dependencies": {
+    "@onflow/sdk": "^1.1.2",
     "@solana/web3.js": "^1.75.0",
     "@toruslabs/openlogin": "^3.2.1",
     "@web3auth/base": "^5.1.0",
