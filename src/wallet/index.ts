@@ -9,7 +9,7 @@ import {hashMsgHex, secp256k1, seedToKeyPair} from './signUtils'
 import {Web3AuthLoginProvider, Web3authUserMetadata} from '../web3auth/types'
 
 export class Wallet {
-  private _accountInfo: AccountInfo | null = null
+  public accountInfo: AccountInfo | null = null
   constructor(
     private web3AuthConnection: Web3AuthConnection,
     private flowportApiConnection: FlowportApiConnection,
@@ -25,9 +25,9 @@ export class Wallet {
   }
 
   private async signMessage(message: string): Promise<string> {
-    assert(!!this._accountInfo)
+    assert(!!this.accountInfo)
     const signature = secp256k1
-      .keyFromPrivate(Buffer.from(this._accountInfo.privKey, 'hex'))
+      .keyFromPrivate(Buffer.from(this.accountInfo.privKey, 'hex'))
       .sign(hashMsgHex(message))
     const n = 32
     const r = signature.r.toArrayLike(Buffer, 'be', n)
@@ -45,10 +45,10 @@ export class Wallet {
     )
 
   signProofOfAccountOwnership = (proofData: AccountProofData) => {
-    assert(!!this._accountInfo)
+    assert(!!this.accountInfo)
     const message = fcl.WalletUtils.encodeAccountProof({
       appIdentifier: proofData.appIdentifier,
-      address: this._accountInfo.address,
+      address: this.accountInfo.address,
       nonce: proofData.nonce,
     })
     return this.signMessage(message)
@@ -59,10 +59,10 @@ export class Wallet {
   ): Promise<AccountInfo> => {
     try {
       if (
-        this._accountInfo &&
-        this._accountInfo.web3authUserInfo.loginProvider === loginProvider
+        this.accountInfo &&
+        this.accountInfo.web3authUserInfo.loginProvider === loginProvider
       ) {
-        return this._accountInfo
+        return this.accountInfo
       }
       if (await this.web3AuthConnection.isLoggedIn()) {
         // re-login in web3Auth with the previously logged user to get user info
@@ -91,12 +91,12 @@ export class Wallet {
     const pubKeyInfo = keys.find((k) => k.publicKey === rootKeyPair.pubKey)
     assert(!!pubKeyInfo)
     const accountInfoOnChain = {...rest, pubKeyInfo}
-    this._accountInfo = {
+    this.accountInfo = {
       ...accountInfoOnChain,
       privKey: rootKeyPair.privKey,
       web3authUserInfo: userInfo.userMetadata,
     }
-    return this._accountInfo
+    return this.accountInfo
   }
 
   private ensureAccountIsCreatedOnChain = async (publicKey: PubKey) => {
@@ -117,7 +117,7 @@ export class Wallet {
 
   logout = async () => {
     await this.web3AuthConnection.logout()
-    this._accountInfo = null
+    this.accountInfo = null
     this._callbacks.onLoginStatusChange({status: 'logged_out'})
   }
 }

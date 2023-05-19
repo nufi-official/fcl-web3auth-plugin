@@ -111,3 +111,7 @@ export async function auth(args?: AuthArgs) {
 }
 
 export {web3AuthProviderMetadata as loginProviders} from './constants'
+
+export const getUserInfo = () => {
+  return wallet.instance().accountInfo?.web3authUserInfo
+}
