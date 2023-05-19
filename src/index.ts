@@ -10,7 +10,7 @@ import {
   web3AuthProviderMetadata,
 } from './constants'
 import {FlowportApiConnection} from './flowportApi'
-import {appendLoginModal} from './modal'
+import {getUi} from './ui'
 import {Web3AuthConnection} from './web3auth/connection'
 import {createApi} from './connector/api'
 import {listenToMessages} from './connector'
@@ -56,12 +56,15 @@ type AuthArgs =
     }
 
 export async function auth(args?: AuthArgs) {
+  const ui = getUi()
   // instead of exposing fn for unauth, we just logout user every time before he tries to log in
-  await wallet.instance().logout()
+  wallet.instance().logout()
+
   if (args && 'loginProvider' in args) {
     await authWithProvider(args.loginProvider)
     return
   }
+
   if (args && 'loginProviderWhiteList' in args) {
     const whitelist = args.loginProviderWhiteList
     const web3AuthProviderMetadataWhitelist = whitelist
@@ -69,10 +72,17 @@ export async function auth(args?: AuthArgs) {
           whitelist.includes(loginProvider),
         )
       : web3AuthProviderMetadata
-    appendLoginModal(web3AuthProviderMetadataWhitelist, authWithProvider)
+    ui.showLoginModal({
+      onAuthWithProvider: authWithProvider,
+      loginProvidersMetadata: web3AuthProviderMetadataWhitelist,
+    })
     return
   }
-  appendLoginModal(web3AuthProviderMetadata, authWithProvider)
+
+  ui.showLoginModal({
+    onAuthWithProvider: authWithProvider,
+    loginProvidersMetadata: web3AuthProviderMetadata,
+  })
 }
 
 export {web3AuthProviderMetadata as loginProviders} from './constants'
