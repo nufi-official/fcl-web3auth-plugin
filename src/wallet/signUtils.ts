@@ -1,4 +1,4 @@
-import {bip32} from '../web3auth/bip32'
+import {bip32} from './bip32'
 import {assert} from '../typeUtils'
 import {ec as EC} from 'elliptic'
 import {SHA256 as SHA2} from 'sha2'
