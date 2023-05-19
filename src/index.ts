@@ -18,6 +18,7 @@ import * as fcl from '@onflow/fcl'
 import {serviceDefinition} from './connector/serviceDefinition'
 import wallet from './wallet'
 import {WalletActionsCallbacks} from './wallet/types'
+import {assert} from './typeUtils'
 
 const getDefaultWalletCallbacks = (): WalletActionsCallbacks => {
   const ui = getUi()
@@ -88,11 +89,18 @@ export function auth(args?: AuthArgs): void {
     })
   }
 
-  const web3AuthProviderMetadataWhitelist = args.loginProviderWhiteList
-    ? web3AuthProviderMetadata.filter(({loginProvider}) =>
-        args.loginProviderWhiteList.includes(loginProvider),
+  const web3AuthProviderMetadataWhitelist = args.loginProviderWhiteList.map(
+    (whitelistedProvider) => {
+      const provider = web3AuthProviderMetadata.find(
+        ({loginProvider}) => loginProvider === whitelistedProvider,
       )
-    : web3AuthProviderMetadata
+      assert(
+        !!provider,
+        `${whitelistedProvider} not among available login providers`,
+      )
+      return provider
+    },
+  )
 
   return ui.showLoginModal({
     onAuthWithProvider: authWithProvider,
