@@ -1,0 +1,36 @@
+version: 2.1
+
+defaults: &defaults
+  docker:
+    - image: cimg/node:18.15.0-browsers
+
+jobs:
+  audit:
+    <<: *defaults
+    steps:
+      - checkout
+      - run: yarn install
+      - run: yarn audit
+
+  lint:
+    <<: *defaults
+    steps:
+      - checkout
+      - run: yarn install
+      - run: yarn lint
+      - run: yarn prettier:check
+
+  tsc:
+    <<: *defaults
+    steps:
+      - checkout
+      - run: yarn install
+      - run: yarn test:tsc
+
+workflows:
+  version: 2
+  workflow:
+    jobs:
+      - audit
+      - lint
+      - tsc
