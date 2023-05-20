@@ -22,9 +22,18 @@ const modalInnerHtml = `
       </path>
     </svg>
   </button>
+  <style>
+    .provider-list::-webkit-scrollbar {
+      display: none;
+    }
+    .provider-list {
+      -ms-overflow-style: none;  /* IE and Edge */
+      scrollbar-width: none;  /* Firefox */
+    }
+  </style>
   <div style="padding-inline-start: 1.5rem;padding-inline-end: 1.5rem;padding-top: 1.25rem;padding-bottom: 1.25rem;">
     <div>
-      <div style="padding-inline-start: 1rem;padding-inline-end: 1rem;padding-top: 1.25rem;padding-bottom: 1.25rem;">
+      <div class="provider-list" style="padding-inline-start: 1rem;padding-inline-end: 1rem;padding-top: 1.25rem;padding-bottom: 1.25rem;max-height: 38rem;overflow: overlay;">
         <div style="display: flex;flex-direction: column;" class="wallet-provider-list">
         </div>
       </div>

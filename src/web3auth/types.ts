@@ -9,24 +9,7 @@ export type Web3AuthNetwork = Extract<
   (typeof WEB3_AUTH_NETWORKS)[number]
 >
 
-export const WEB3_AUTH_LOGIN_PROVIDERS = [
-  'google',
-  'facebook',
-  'twitter',
-  // 'reddit',
-  'discord',
-  // 'twitch',
-  // 'apple',
-  // 'github',
-  // 'linkedin',
-  // 'line',
-  // 'wechat',
-] as const
-
-export type Web3AuthLoginProvider = Extract<
-  ValueOf<typeof LOGIN_PROVIDER>,
-  (typeof WEB3_AUTH_LOGIN_PROVIDERS)[number]
->
+export type Web3AuthLoginProvider = ValueOf<typeof LOGIN_PROVIDER>
 
 export type Web3AuthMfaLevel = 'default' | 'optional' | 'mandatory' | 'none'
 
