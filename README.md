@@ -4,7 +4,7 @@
 
 ## Description
 
-This package is a plugin for dapps on Flow blockchain which already use [FCL](https://github.com/onflow/fcl-js). It enables users to login in through popular social login providers such as Google, Facebook, Discord and others. With [couple of lines of code](https://github.com/nufi-official/walletless-flow/pull/12), allow your users to onboard more easily through social login of their choice and keep your FCL integration untouched. See kitty items demo app [here](https://wallet.nu.fi/) and find more about web3Auth [here](https://web3auth.io/).
+This package is a plugin for dapps on Flow blockchain which already use [FCL](https://github.com/onflow/fcl-js). It enables users to login in through popular social login providers such as Google, Facebook, Discord and others. With [couple of lines of code](https://github.com/nufi-official/walletless-flow/pull/12), allow your users to onboard more easily through social login of their choice and keep your FCL integration untouched. A "Kitty Items" demo app using this lib is deployed at https://walletless.nu.fi/ and you can find more about web3Auth [here](https://web3auth.io/).
 
 ![login](https://github.com/nufi-official/fcl-web3auth-plugin/assets/22474126/4623f55b-2f94-4e70-ae11-6701bfd15b52)
 
@@ -141,6 +141,32 @@ Keys are derived according to [FLIP-200](https://github.com/onflow/flow/pull/200
 
 Check KittyItems demo app [here](https://wallet.nu.fi/).
 Check the repo [here](https://github.com/nufi-official/walletless-flow/pull/12)
+
+## Development
+
+Install dependencies:
+
+```bash
+yarn install
+```
+
+Build the package:
+
+```bash
+yarn build
+```
+
+Validate types:
+
+```bash
+yarn test:tsc
+```
+
+Run linter:
+
+```bash
+yarn lint
+```
 
 ## License
 
