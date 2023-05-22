@@ -8,6 +8,11 @@ This package is a plugin for DApps on Flow blockchain that already use [FCL](htt
 
 ![login](https://github.com/nufi-official/fcl-web3auth-plugin/assets/22474126/4623f55b-2f94-4e70-ae11-6701bfd15b52)
 
+## Prerequisites
+
+1. An existing project using [FCL authentication](https://developers.flow.com/tooling/fcl-js/authentication)
+2. [Create a web3auth account](https://dashboard.web3auth.io/) (currently, there's a free plan available) and set up a `Plug n Play` project there. Choose your project name, pick environment (`network` parameter), for "Chain" select "Any other chain". You will get a client id specific your application. More info in [Web3Auth docs](https://web3auth.io/docs/pnp/introduction)
+
 ## Installation
 
 ```bash
@@ -24,7 +29,7 @@ yarn add @nufi/fcl-web3auth-plugin
 
 ### `init(args: InitArgs): void`
 
-Initialize the package with the specified arguments. This method in the background initialized the Web3Auth connection with the `Plug n Play` method, through the `OpenLogin` adapter. More info can be found in [Web3Auth docs](https://web3auth.io/docs/sdk/web/no-modal/usage)
+Initialize the package with the specified arguments. This method in the background initialized the Web3Auth integration with the `Plug n Play` project. It will perform the user login through the `OpenLogin` adapter. More info can be found in [Web3Auth docs](https://web3auth.io/docs/sdk/web/no-modal/usage)
 
 - `clientId`: The client ID for authentication. [Create a web3auth account](https://dashboard.web3auth.io/) (it's free) and create a project. Choose your project name, pick environment (`network` parameter), for "Chain" select "Any other chain". You will get a client id specific your application.
 - `network`: The Web3AuthNetwork to connect to (`mainnet`, `testnet`, or any other [Web3Auth network](https://web3auth.io/docs/dashboard-setup/get-client-id), not to be confused with Flow blockchain mainnet/testnet!)
