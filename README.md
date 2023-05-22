@@ -4,7 +4,7 @@
 
 ## Description
 
-This package is a plugin for dapps on Flow blockchain which already use [FCL](https://github.com/onflow/fcl-js). It enables users to login in through popular social login providers such as Google, Facebook, Discord and others. With [couple of lines of code](https://github.com/nufi-official/walletless-flow/pull/12), allow your users to onboard more easily through social login of their choice and keep your FCL integration untouched. A "Kitty Items" demo app using this lib is deployed at https://walletless.nu.fi/ and you can find more about web3Auth [here](https://web3auth.io/).
+This package is a plugin for DApps on Flow blockchain that already use [FCL](https://github.com/onflow/fcl-js). It enables users to log in in through popular social login providers such as Google, Facebook, Discord and others. With a [couple of lines of code](https://github.com/nufi-official/walletless-flow/pull/12), allow your users to onboard more easily through social login of their choice and keep your FCL integration untouched. A "Kitty Items" demo app using this lib is deployed at https://walletless.nu.fi/ and [here](https://web3auth.io/) you can find more about Web3Auth, the service powering this package.
 
 ![login](https://github.com/nufi-official/fcl-web3auth-plugin/assets/22474126/4623f55b-2f94-4e70-ae11-6701bfd15b52)
 
@@ -24,10 +24,10 @@ yarn add fcl-web3auth-plugin
 
 ### `init(args: InitArgs): void`
 
-Initialize the package with the specified arguments.
+Initialize the package with the specified arguments. This method in the background initialized the Web3Auth connection with the `Plug n Play` method, through the `OpenLogin` adapter. More info can be found in [Web3Auth docs](https://web3auth.io/docs/sdk/web/no-modal/usage)
 
-- `clientId`: The client ID for authentication. [Create a web3auth account](https://dashboard.web3auth.io/) (it's free) and create a project. Choose your project name, pick environment (`network` parameter), choose for "Chain" select "Any other chain". You will get a client id specific your application.
-- `network`: The Web3AuthNetwork to connect to (`mainnet` or `testnet`)
+- `clientId`: The client ID for authentication. [Create a web3auth account](https://dashboard.web3auth.io/) (it's free) and create a project. Choose your project name, pick environment (`network` parameter), for "Chain" select "Any other chain". You will get a client id specific your application.
+- `network`: The Web3AuthNetwork to connect to (`mainnet`, `testnet`, or any other [Web3Auth network](https://web3auth.io/docs/dashboard-setup/get-client-id), not to be confused with Flow blockchain mainnet/testnet!)
 - `mfaLevel` (optional): The MFA (Multi-Factor Authentication) level. Default: `'none'`.
 - `uxMode` (optional): The UX (User Experience) mode. Default: `'popup'`.
 
@@ -52,7 +52,7 @@ export default function MyApp() {
 Authenticate the user.
 
 - `args` (optional): An object specifying the authentication arguments.
-  - If `args` contains a `loginProviderWhiteList` property, the user will be shown a login modal with the specified login provider whitelist (ordered).
+  - If `args` contains a `loginProviderWhiteList` property, the user will be shown a login modal with the specified login providers (ordered the same as in the passed array).
   - If `args` are `undefined`, the user will be shown a login modal with all login options.
 
 **Examples**
@@ -72,7 +72,7 @@ import {auth} from 'fcl-web3auth-plugin'
 
 ### `authWithProvider(loginProvider: Web3AuthLoginProvider): Promise<void>`
 
-Authenticate the user with selected login provider.
+Authenticate the user with the selected login provider.
 
 - user will be authenticated using the specified `Web3AuthLoginProvider`.
 
@@ -102,9 +102,9 @@ An array of available login providers. Handy if you want to have your own UI for
 Configure the package with the specified callbacks.
 
 - `callbacks`: An object containing partial implementations of the `WalletActionsCallbacks` interface.
-- it allows you to call you own actions instead of the default ones
-- when and account is being created, (which might take a while and for this reason a default loading overlay is provided)
-- when signing transactions
+- This callbacks allow you to call you own actions instead of the default ones:
+  - when an account is being created, (which might take a while and for this reason a default loading overlay is provided)
+  - when signing transactions
 
 **NOTE:** calling `setCallbacks` is optional, in case you are fine with using the default UI you do not need to call it
 
@@ -126,11 +126,11 @@ setCallbacks({
 
 Experimental feature, not production ready, waiting for the official standard for hybrid custody to be finalized
 
-- submits two transaction, first a child account (web3Auth account) publishes its auth account capability to parent address, then parent (a regular wallet like NuFi, Lilico) submits a transaction claiming the capability
+- submits two transaction, first a child account (Web3Auth account) publishes its auth account capability to the parent address, then the parent (a regular wallet like NuFi, Lilico) submits a transaction claiming the capability
 
 ## Key derivation
 
-Keys are derived according to [FLIP-200](https://github.com/onflow/flow/pull/200)
+The keys are derived according to [FLIP-200](https://github.com/onflow/flow/pull/200)
 
 - get `seed` from web3auth
 - derive bip32 keypair using `m/44'/539'/0'/0/0` path
