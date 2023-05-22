@@ -22,7 +22,7 @@
     "build": "yarn build:esm && yarn build:cjs",
     "build:esm": "tsc",
     "build:cjs": "tsc --module commonjs --outDir dist/cjs",
-    "prettier:fix": "yarn prettier .",
+    "prettier:fix": "yarn prettier --write .",
     "prettier:check": "yarn prettier --check .",
     "lint": "yarn eslint .",
     "test:tsc": "yarn tsc --noEmit",

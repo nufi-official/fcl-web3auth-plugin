@@ -8,7 +8,11 @@ const getLoginProviderButtonInnerHtml = (
   <div style="padding: 0.75rem;">
     <div>
       <div style="display: flex;-webkit-box-align: center;align-items: center;">
-        ${imgSrc ? `<img src="${imgSrc}" style="width: 3rem;height: 3rem;">` : ''}
+        ${
+          imgSrc
+            ? `<img src="${imgSrc}" style="width: 3rem;height: 3rem;">`
+            : ''
+        }
         <b style="margin-inline: 0.5rem 0px;">${serviceName}</b>
       </div>
     </div>
