@@ -1,6 +1,6 @@
 # fcl-web3auth-plugin
 
-[![npm version](https://badge.fury.io/js/fcl-web3auth-plugin.svg)](https://badge.fury.io/js/fcl-web3auth-plugin)
+[![npm version](https://badge.fury.io/js/%40nufi%2Ffcl-web3auth-plugin.svg)](https://badge.fury.io/js/%40nufi%2Ffcl-web3auth-plugin)
 
 ## Description
 
@@ -11,13 +11,13 @@ This package is a plugin for DApps on Flow blockchain that already use [FCL](htt
 ## Installation
 
 ```bash
-npm install fcl-web3auth-plugin
+npm install @nufi/fcl-web3auth-plugin
 ```
 
 or
 
 ```bash
-yarn add fcl-web3auth-plugin
+yarn add @nufi/fcl-web3auth-plugin
 ```
 
 ## API Reference
@@ -59,7 +59,7 @@ Authenticate the user.
 
 In case you want to use the default UI
 
-```html
+```jsx
 import {auth} from 'fcl-web3auth-plugin'
 ...
 ...
@@ -78,7 +78,7 @@ Authenticate the user with the selected login provider.
 
 In case you want to use your own UI
 
-```html
+```jsx
 import {auth, loginProviders} from 'fcl-web3auth-plugin'
 ...
 ...
@@ -89,7 +89,7 @@ import {auth, loginProviders} from 'fcl-web3auth-plugin'
         {name}
       </button>
     )
-  }}}
+  })}
 </div>
 ```
 
