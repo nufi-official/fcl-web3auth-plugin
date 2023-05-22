@@ -17,7 +17,8 @@
     "prettier:fix": "yarn prettier .",
     "prettier:check": "yarn prettier --check .",
     "lint": "yarn eslint .",
-    "test:tsc": "yarn tsc --noEmit"
+    "test:tsc": "yarn tsc --noEmit",
+    "prepublishOnly": "rm -rf dist && yarn lint && yarn test:tsc && yarn build"
   },
   "keywords": [],
   "author": "",
