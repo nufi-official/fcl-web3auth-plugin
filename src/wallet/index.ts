@@ -7,6 +7,7 @@ import * as fcl from '@onflow/fcl'
 import {Web3AuthConnection} from '../web3auth/connection'
 import {hashMsgHex, secp256k1, seedToKeyPair} from './signUtils'
 import {Web3AuthLoginProvider, Web3authUserMetadata} from '../web3auth/types'
+import {entropyToMnemonic, mnemonicToSeed} from 'bip39'
 
 export class Wallet {
   public accountInfo: AccountInfo | null = null
@@ -92,7 +93,8 @@ export class Wallet {
     privateKey: Buffer
     userMetadata: Web3authUserMetadata
   }): Promise<AccountInfo> => {
-    const rootKeyPair = seedToKeyPair(userInfo.privateKey.toString('hex'))
+    const mnemonic = entropyToMnemonic(userInfo.privateKey.toString('hex'))
+    const rootKeyPair = seedToKeyPair(await mnemonicToSeed(mnemonic))
     const address = await this.ensureAccountIsCreatedOnChain(rootKeyPair.pubKey)
     const {keys, ...rest} = await fcl.account(address)
     const pubKeyInfo = keys.find((k) => k.publicKey === rootKeyPair.pubKey)

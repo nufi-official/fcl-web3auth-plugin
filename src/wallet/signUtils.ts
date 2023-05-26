@@ -10,9 +10,9 @@ const sansUncompressedPrefix = (uncompressedPubKey: string): PubKey =>
 
 export const secp256k1 = new EC('secp256k1')
 
-export const seedToKeyPair = (rootSeed: string): RootKeyPair => {
+export const seedToKeyPair = (rootSeed: Buffer): RootKeyPair => {
   const path = "m/44'/539'/0'/0/0"
-  const rootNode = bip32.fromSeed(Buffer.from(rootSeed, 'hex'))
+  const rootNode = bip32.fromSeed(rootSeed)
   const child = rootNode.derivePath(path)
   assert(!!child.privateKey)
 
