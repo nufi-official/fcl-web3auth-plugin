@@ -137,7 +137,9 @@ Experimental feature, not production ready, waiting for the official standard fo
 
 The keys are derived according to [FLIP-200](https://github.com/onflow/flow/pull/200)
 
-- get `seed` from web3auth
+- get `entropy` from web3auth
+- create `mnemonic` from `entropy` using bip39
+- get `seed` from mnemonic
 - derive bip32 keypair using `m/44'/539'/0'/0/0` path
 - use `secp256k1` derivation curve
 - use `SHA2` hashing algorithm
