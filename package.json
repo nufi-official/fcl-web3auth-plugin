@@ -1,6 +1,6 @@
 {
   "name": "@nufi/fcl-web3auth-plugin",
-  "version": "1.0.0-alpha.7",
+  "version": "2.0.0-alpha.0",
   "description": "Integrate Web3Auth (social login) into your Flow DApp with minimal code",
   "homepage": "https://nu.fi",
   "repository": {
