@@ -6,7 +6,7 @@
 
 This package is a plugin for DApps on Flow blockchain that already use [FCL](https://github.com/onflow/fcl-js). It enables users to log in in through popular social login providers such as Google, Facebook, Discord and others. With a [couple of lines of code](https://github.com/nufi-official/walletless-flow/pull/12), allow your users to onboard more easily through social login of their choice and keep your FCL integration untouched. A "Kitty Items" demo app using this lib is deployed at https://walletless.nu.fi/ and [here](https://web3auth.io/) you can find more about Web3Auth, the service powering this package.
 
-![login](https://github.com/nufi-official/fcl-web3auth-plugin/assets/22474126/4623f55b-2f94-4e70-ae11-6701bfd15b52)
+![Walletless FCL 1mb](https://github.com/nufi-official/fcl-web3auth-plugin/assets/22474126/a105b482-f92d-4e46-bb0d-8898ff350ae3)
 
 ## Prerequisites
 
