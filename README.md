@@ -129,7 +129,7 @@ setCallbacks({
 
 ### `experimentalLinkAccount(args: LinkAccountArgs): Promise<string>`
 
-Experimental feature, not production ready, waiting for the official standard for hybrid custody to be finalized
+Experimental feature, not production ready, waiting for the official standard for [hybrid custody](https://developers.flow.com/concepts/hybrid-custody) to be finalized
 
 - submits two transaction, first a child account (Web3Auth account) publishes its auth account capability to the parent address, then the parent (a regular wallet like NuFi, Lilico) submits a transaction claiming the capability
 
@@ -138,7 +138,7 @@ Experimental feature, not production ready, waiting for the official standard fo
 The keys are derived according to [FLIP-200](https://github.com/onflow/flow/pull/200)
 
 - get `entropy` from web3auth
-- create `mnemonic` from `entropy` using bip39
+- create `mnemonic` from `entropy` using bip39 (this ensures portability of the account to [NuFi](https://nu.fi) wallet even without [account-linking](#experimentallinkaccountargs-linkaccountargs-promisestring)
 - get `seed` from mnemonic
 - derive bip32 keypair using `m/44'/539'/0'/0/0` path
 - use `secp256k1` derivation curve
