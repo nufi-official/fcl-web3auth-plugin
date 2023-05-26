@@ -138,7 +138,7 @@ Experimental feature, not production ready, waiting for the official standard fo
 The keys are derived according to [FLIP-200](https://github.com/onflow/flow/pull/200)
 
 - get `entropy` from web3auth
-- create `mnemonic` from `entropy` using bip39 (this ensures portability of the account to [NuFi](https://nu.fi) wallet even without [account-linking](#experimentallinkaccountargs-linkaccountargs-promisestring)
+- create `mnemonic` from `entropy` using bip39 (this ensures portability of the account to [NuFi](https://nu.fi) wallet even without [account-linking](#experimentallinkaccountargs-linkaccountargs-promisestring))
 - get `seed` from mnemonic
 - derive bip32 keypair using `m/44'/539'/0'/0/0` path
 - use `secp256k1` derivation curve
